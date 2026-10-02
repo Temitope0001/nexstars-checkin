@@ -100,7 +100,9 @@ function onScanSuccess(decodedText) {
 }
     function startScanner() {
 
-  const newScanner =
+  isProcessing = false;
+
+  html5QrcodeScanner =
     new Html5QrcodeScanner(
       "reader",
       {
@@ -109,33 +111,22 @@ function onScanSuccess(decodedText) {
       }
     );
 
-  newScanner.render(
+  html5QrcodeScanner.render(
     onScanSuccess,
     onScanFailure
   );
 
 }
+startScanner();
+
 
 
     function onScanFailure(error) {
       // Ignore normal failed scans
     }
 
-
-    const html5QrcodeScanner =
-      new Html5QrcodeScanner(
-        "reader",
-        {
-          fps: 10,
-          qrbox: 250
-        }
-      );
-
-
-    html5QrcodeScanner.render(
-      onScanSuccess,
-      onScanFailure
-    );
+let html5QrcodeScanner = null;
+let isProcessing = false;
 
   </script>
 
@@ -171,7 +162,13 @@ function onScanSuccess(decodedText) {
 
     function onScanSuccess(decodedText) {
 
-      html5QrcodeScanner.clear();
+  // Ignore repeated detections while processing
+  if (isProcessing) return;
+
+  isProcessing = true;
+
+  // Stop scanning temporarily
+  html5QrcodeScanner.clear();
 
       document.getElementById("result").innerHTML =
         "🔄 Checking ticket...";
