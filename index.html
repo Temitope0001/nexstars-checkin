@@ -47,38 +47,74 @@
       "https://script.google.com/macros/s/AKfycbybXjEFpr8lOj1_l57OabJAGweCQH36IS6ne88mRnCgB5ZAunSpqoxi1J4FBWnZV5sIlQ/exec";
 
 
-    function onScanSuccess(decodedText) {
+function onScanSuccess(decodedText) {
 
-      // Stop the scanner after a successful scan
-      html5QrcodeScanner.clear();
+  // Stop scanning temporarily
+  html5QrcodeScanner.clear();
+
+  document.getElementById("result").innerHTML =
+    "🔄 Checking ticket...";
+
+  fetch(
+    API_URL +
+    "?token=" +
+    encodeURIComponent(decodedText)
+  )
+
+  .then(response => response.text())
+
+  .then(result => {
+
+    document.getElementById("result").innerHTML =
+      result;
+
+    // Wait 2 seconds, then prepare for the next scan
+    setTimeout(() => {
 
       document.getElementById("result").innerHTML =
-        "🔄 Checking ticket...";
+        "📷 Ready for next scan";
 
-      // Send QR token to Apps Script
-      fetch(
-        API_URL +
-        "?token=" +
-        encodeURIComponent(decodedText)
-      )
+      startScanner();
 
-      .then(response => response.text())
+    }, 2000);
 
-      .then(result => {
+  })
 
-        document.getElementById("result").innerHTML =
-          result;
+  .catch(error => {
 
-      })
+    document.getElementById("result").innerHTML =
+      "❌ Connection error: " + error;
 
-      .catch(error => {
+    // Still allow another scan after an error
+    setTimeout(() => {
 
-        document.getElementById("result").innerHTML =
-          "❌ Connection error: " + error;
+      document.getElementById("result").innerHTML =
+        "📷 Ready for next scan";
 
-      });
+      startScanner();
 
-    }
+    }, 2000);
+
+  });
+
+}
+    function startScanner() {
+
+  const newScanner =
+    new Html5QrcodeScanner(
+      "reader",
+      {
+        fps: 10,
+        qrbox: 250
+      }
+    );
+
+  newScanner.render(
+    onScanSuccess,
+    onScanFailure
+  );
+
+}
 
 
     function onScanFailure(error) {
