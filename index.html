@@ -42,6 +42,97 @@
 
   <script>
 
+    // YOUR APPS SCRIPT WEB APP URL
+    const API_URL =
+      "https://script.google.com/macros/s/AKfycbybXjEFpr8lOj1_l57OabJAGweCQH36IS6ne88mRnCgB5ZAunSpqoxi1J4FBWnZV5sIlQ/exec";
+
+
+    function onScanSuccess(decodedText) {
+
+      // Stop the scanner after a successful scan
+      html5QrcodeScanner.clear();
+
+      document.getElementById("result").innerHTML =
+        "🔄 Checking ticket...";
+
+      // Send QR token to Apps Script
+      fetch(
+        API_URL +
+        "?token=" +
+        encodeURIComponent(decodedText)
+      )
+
+      .then(response => response.text())
+
+      .then(result => {
+
+        document.getElementById("result").innerHTML =
+          result;
+
+      })
+
+      .catch(error => {
+
+        document.getElementById("result").innerHTML =
+          "❌ Connection error: " + error;
+
+      });
+
+    }
+
+
+    function onScanFailure(error) {
+      // Ignore normal failed scans
+    }
+
+
+    const html5QrcodeScanner =
+      new Html5QrcodeScanner(
+        "reader",
+        {
+          fps: 10,
+          qrbox: 250
+        }
+      );
+
+
+    html5QrcodeScanner.render(
+      onScanSuccess,
+      onScanFailure
+    );
+
+  </script>
+
+</body>
+</html>
+    #reader {
+      width: 100%;
+      max-width: 400px;
+      margin: 20px auto;
+    }
+
+    #result {
+      margin-top: 20px;
+      font-size: 20px;
+      font-weight: bold;
+    }
+  </style>
+</head>
+
+<body>
+
+  <h1>Nexstars Check-in</h1>
+
+  <p>Scan the participant's QR ticket</p>
+
+  <div id="reader"></div>
+
+  <div id="result">
+    Waiting for scan...
+  </div>
+
+  <script>
+
     function onScanSuccess(decodedText) {
 
       html5QrcodeScanner.clear();
