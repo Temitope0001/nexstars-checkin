@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  <title>Nexstars Check-in</title>
+
+  <script src="https://unpkg.com/html5-qrcode"></script>
+
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      text-align: center;
+      padding: 20px;
+    }
+
+    #reader {
+      width: 100%;
+      max-width: 400px;
+      margin: 20px auto;
+    }
+
+    #result {
+      margin-top: 20px;
+      font-size: 20px;
+      font-weight: bold;
+    }
+  </style>
+</head>
+
+<body>
+
+  <h1>Nexstars Check-in</h1>
+
+  <p>Scan the participant's QR ticket</p>
+
+  <div id="reader"></div>
+
+  <div id="result">
+    Waiting for scan...
+  </div>
+
+  <script>
+
+    function onScanSuccess(decodedText) {
+
+      html5QrcodeScanner.clear();
+
+      document.getElementById("result").innerHTML =
+        "🔄 Checking ticket...";
+
+      // We will connect this to your Google Apps Script next.
+      document.getElementById("result").innerHTML =
+        "QR detected: " + decodedText;
+
+    }
+
+    function onScanFailure(error) {
+      // Ignore normal failed scans.
+    }
+
+    const html5QrcodeScanner =
+      new Html5QrcodeScanner(
+        "reader",
+        {
+          fps: 10,
+          qrbox: 250
+        }
+      );
+
+    html5QrcodeScanner.render(
+      onScanSuccess,
+      onScanFailure
+    );
+
+  </script>
+
+</body>
+</html>
