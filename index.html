@@ -42,160 +42,101 @@
 
   <script>
 
-    // YOUR APPS SCRIPT WEB APP URL
     const API_URL =
       "https://script.google.com/macros/s/AKfycbybXjEFpr8lOj1_l57OabJAGweCQH36IS6ne88mRnCgB5ZAunSpqoxi1J4FBWnZV5sIlQ/exec";
 
 
-function onScanSuccess(decodedText) {
+    let html5QrcodeScanner = null;
+    let isProcessing = false;
 
-  // Stop scanning temporarily
-  html5QrcodeScanner.clear();
 
-  document.getElementById("result").innerHTML =
-    "🔄 Checking ticket...";
+    function onScanSuccess(decodedText) {
 
-  fetch(
-    API_URL +
-    "?token=" +
-    encodeURIComponent(decodedText)
-  )
+      // Prevent the same QR from being processed repeatedly
+      if (isProcessing) return;
 
-  .then(response => response.text())
+      isProcessing = true;
 
-  .then(result => {
-
-    document.getElementById("result").innerHTML =
-      result;
-
-    // Wait 2 seconds, then prepare for the next scan
-    setTimeout(() => {
+      // Stop the scanner while checking the ticket
+      html5QrcodeScanner.clear();
 
       document.getElementById("result").innerHTML =
-        "📷 Ready for next scan";
+        "🔄 Checking ticket...";
 
-      startScanner();
 
-    }, 2000);
+      fetch(
+        API_URL +
+        "?token=" +
+        encodeURIComponent(decodedText)
+      )
 
-  })
+      .then(response => response.text())
 
-  .catch(error => {
+      .then(result => {
 
-    document.getElementById("result").innerHTML =
-      "❌ Connection error: " + error;
+        document.getElementById("result").innerHTML =
+          result;
 
-    // Still allow another scan after an error
-    setTimeout(() => {
+        // Wait 2 seconds before allowing another scan
+        setTimeout(() => {
 
-      document.getElementById("result").innerHTML =
-        "📷 Ready for next scan";
+          document.getElementById("result").innerHTML =
+            "📷 Ready for next scan";
 
-      startScanner();
+          startScanner();
 
-    }, 2000);
+        }, 2000);
 
-  });
+      })
 
-}
-    function startScanner() {
+      .catch(error => {
 
-  isProcessing = false;
+        document.getElementById("result").innerHTML =
+          "❌ Connection error: " + error;
 
-  html5QrcodeScanner =
-    new Html5QrcodeScanner(
-      "reader",
-      {
-        fps: 10,
-        qrbox: 250
-      }
-    );
+        // Allow another scan even if there is an error
+        setTimeout(() => {
 
-  html5QrcodeScanner.render(
-    onScanSuccess,
-    onScanFailure
-  );
+          document.getElementById("result").innerHTML =
+            "📷 Ready for next scan";
 
-}
-startScanner();
+          startScanner();
 
+        }, 2000);
+
+      });
+
+    }
 
 
     function onScanFailure(error) {
       // Ignore normal failed scans
     }
 
-let html5QrcodeScanner = null;
-let isProcessing = false;
 
-  </script>
+    function startScanner() {
 
-</body>
-</html>
-    #reader {
-      width: 100%;
-      max-width: 400px;
-      margin: 20px auto;
-    }
+      isProcessing = false;
 
-    #result {
-      margin-top: 20px;
-      font-size: 20px;
-      font-weight: bold;
-    }
-  </style>
-</head>
+      html5QrcodeScanner =
+        new Html5QrcodeScanner(
+          "reader",
+          {
+            fps: 10,
+            qrbox: 250
+          }
+        );
 
-<body>
-
-  <h1>Nexstars Check-in</h1>
-
-  <p>Scan the participant's QR ticket</p>
-
-  <div id="reader"></div>
-
-  <div id="result">
-    Waiting for scan...
-  </div>
-
-  <script>
-
-    function onScanSuccess(decodedText) {
-
-  // Ignore repeated detections while processing
-  if (isProcessing) return;
-
-  isProcessing = true;
-
-  // Stop scanning temporarily
-  html5QrcodeScanner.clear();
-
-      document.getElementById("result").innerHTML =
-        "🔄 Checking ticket...";
-
-      // We will connect this to your Google Apps Script next.
-      document.getElementById("result").innerHTML =
-        "QR detected: " + decodedText;
-
-    }
-
-    function onScanFailure(error) {
-      // Ignore normal failed scans.
-    }
-
-    const html5QrcodeScanner =
-      new Html5QrcodeScanner(
-        "reader",
-        {
-          fps: 10,
-          qrbox: 250
-        }
+      html5QrcodeScanner.render(
+        onScanSuccess,
+        onScanFailure
       );
 
-    html5QrcodeScanner.render(
-      onScanSuccess,
-      onScanFailure
-    );
+    }
+
+
+    // Start the scanner when the page opens
+    startScanner();
 
   </script>
 
